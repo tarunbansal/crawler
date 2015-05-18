@@ -10,7 +10,7 @@ from collections import deque
 
 VISITED_URLS = {}
 CRAWL_BUFFER = deque([])
-CRAWLER_DEFAULT_WORKERS = 5
+CRAWLER_DEFAULT_WORKERS = 10
 WORKER_WAIT_INTERVAL = 1 #seconds
 MAX_COUNT_LIMIT = None
 
@@ -21,7 +21,7 @@ class WorkerThread(threading.Thread):
         self.name = name
         
     def run(self):
-        while not self.__crawler.kill:
+        while not self.__crawler.kill and self.is_alive():
             try:
                 if len(CRAWL_BUFFER) > 0:
                     strURL = CRAWL_BUFFER.popleft()
@@ -59,18 +59,23 @@ class URL():
 class WebCrawler():
     kill = False
     count = 0
+    listworkers = []
     def __init__(self):
-        self.__listworkers = []
         self.activeWorkers = []
         self.__startWorkers()
 
     def __startWorkers(self):
-        for workerIndex in range(CRAWLER_DEFAULT_WORKERS):
-            strWorkerName = "Worker " + str(workerIndex)
-            worker = WorkerThread(self, strWorkerName)
-            #worker.daemon = True
-            worker.start()
-            self.__listworkers.append(worker)
+        try:
+            for workerIndex in range(CRAWLER_DEFAULT_WORKERS):
+                strWorkerName = "Worker " + str(workerIndex)
+                worker = WorkerThread(self, strWorkerName)
+                #worker.daemon = True
+                worker.start()
+                self.listworkers.append(worker)
+        except Exception as e:
+            print(" exception occured in crawler " + str(e))
+            traceback.print_exc()
+            exit()
 
     def crawl(self,urlObj):
         #BASE_URL = CRAWL_BUFFER.popleft()
@@ -130,10 +135,16 @@ class WebCrawler():
 if __name__ == '__main__':
     #getHTMLCode(str(sys.argv[1]))
     try:
-        if sys.argv[2]:
+        if len(sys.argv) == 3:
             MAX_COUNT_LIMIT = int(sys.argv[2])
         CRAWL_BUFFER.append(str(sys.argv[1]))
         webC = WebCrawler()
+        while webC.listworkers[0].is_alive():
+            webC.listworkers[0].join(1)
+    except KeyboardInterrupt:
+        print("**************** KBI *******************")
+        webC.kill = True
+        exit(0)
     except Exception as e:
         print("Unknown exception occured in main" + str(e))
         traceback.print_exc()
