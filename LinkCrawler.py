@@ -1,8 +1,10 @@
 import urllib.request as urlcon
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
+from urllib.error import URLError, HTTPError
 from bs4 import BeautifulSoup
 import sys
+import socket
 import time
 import threading
 import traceback
@@ -11,7 +13,7 @@ from collections import deque
 VISITED_URLS = {}
 CRAWLED_URLS = {}
 CRAWL_BUFFER = deque([])
-CRAWLER_DEFAULT_WORKERS = 10
+CRAWLER_DEFAULT_WORKERS = 5
 WORKER_WAIT_INTERVAL = 1 #seconds
 MAX_COUNT_LIMIT = None
 
@@ -104,6 +106,7 @@ class WebCrawler():
                         if parsedURL.scheme and "javascript" in parsedURL.scheme:
                             print("***************Javascript found in scheme " + str(eachLink) + "**************")
                             continue
+                        '''Handle internal URLs '''
                         if not parsedURL.scheme and not parsedURL.netloc:
                             print("No scheme and host found for "  + str(eachLink))
                             newURL = urlunparse(parsedURL._replace(**{"scheme":urlObj.scheme,"netloc":urlObj.netloc}))
@@ -112,18 +115,32 @@ class WebCrawler():
                             print("Scheme not found for " + str(eachLink))
                             newURL = urlunparse(parsedURL._replace(**{"scheme":urlObj.scheme}))
                             eachLink = newURL
-                        print(" Found child link " + eachLink)
-                        CRAWL_BUFFER.append(eachLink)
-                        with self._lock:
-                            self.count += 1
-                            print(" Count is =================> " + str(self.count))
-                        boolStatus = self.checkmax()
-                        if boolStatus:
-                            VISITED_URLS.setdefault(eachLink, "True")
-                        else:
-                            return
+                        if eachLink not in VISITED_URLS: #Check again for internal URL's
+                            print(" Found child link " + eachLink)
+                            CRAWL_BUFFER.append(eachLink)
+                            with self._lock:
+                                self.count += 1
+                                print(" Count is =================> " + str(self.count))
+                            boolStatus = self.checkmax()
+                            if boolStatus:
+                                VISITED_URLS.setdefault(eachLink, "True")
+                            else:
+                                return
             else:
-                print("Invalid URL or URL present in visited " + str(urlObj.url))
+                print("URL already present in visited " + str(urlObj.url))
+        except socket.timeout as e:
+            print(" Socket timeout occured*******************" )
+        except URLError as e:
+            if isinstance(e.reason, ConnectionRefusedError):
+                print(" Conn refused error occured*******************")
+            elif isinstance(e.reason, socket.timeout):
+                print(" Socket timed out error occured***************" )
+            elif isinstance(e.reason, OSError):
+                print(" OS error occured*************")
+            elif isinstance(e,HTTPError):
+                print(" HTTP Error occured*************")
+            else:
+                print(" URL Error occured***************")
         except Exception as e:
             print("Unknown exception occured while fetching HTML code" + str(e))
             traceback.print_exc()
@@ -148,7 +165,6 @@ class WebCrawler():
 
 def saveDataToFile(listData):
     '''Save output data in a file under current directory'''
-    
     pass
 
 if __name__ == '__main__':
