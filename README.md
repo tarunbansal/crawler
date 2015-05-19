@@ -15,4 +15,5 @@ python3 LinkCrawler.py https://google.com 100
 NOTE:
 
 Currently implemented in python3 only.
-If no UPPER_LIMIT is specidied the program will run indefinitely untill stopped manually.
+
+If no UPPER_LIMIT is specified the program will run indefinitely untill stopped manually.
