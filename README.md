@@ -6,6 +6,8 @@ An UPPER_LIMIT can be set on the number of links to be crawled.
 
 USAGE:
 
+Download the project zip from this page and extract.
+Run Link crawler using:
 ```python3 LinkCrawler.py URL UPPER_LIMIT```
 
 EXAMPLE:
