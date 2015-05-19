@@ -134,18 +134,18 @@ class WebCrawler():
             else:
                 print("URL already present in visited " + str(urlObj.url))
         except socket.timeout as e:
-            print(" Socket timeout occured*******************" )
+            print("**************** Socket timeout occured*******************" )
         except URLError as e:
             if isinstance(e.reason, ConnectionRefusedError):
-                print(" Conn refused error occured*******************")
+                print("**************** Conn refused error occured*******************")
             elif isinstance(e.reason, socket.timeout):
-                print(" Socket timed out error occured***************" )
+                print("**************** Socket timed out error occured***************" )
             elif isinstance(e.reason, OSError):
-                print(" OS error occured*************")
+                print("**************** OS error occured*************")
             elif isinstance(e,HTTPError):
-                print(" HTTP Error occured*************")
+                print("**************** HTTP Error occured*************")
             else:
-                print(" URL Error occured***************")
+                print("**************** URL Error occured***************")
         except Exception as e:
             print("Unknown exception occured while fetching HTML code" + str(e))
             traceback.print_exc()
