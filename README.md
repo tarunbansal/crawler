@@ -1,6 +1,6 @@
 # crawler
 
-Recursively crawl links from a given webpage.
+Recursively crawl links from a given webpage in a breadth first (BFS) approach.
 
 An UPPER_LIMIT can be set on the number of links to be crawled.
 
