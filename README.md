@@ -4,16 +4,16 @@ Recursively crawl links from a given webpage in a breadth first (BFS) approach.
 
 An UPPER_LIMIT can be set on the number of links to be crawled.
 
-USAGE:
+## USAGE:
 
 Download the project zip from this page and extract.
 Run Link crawler using:
 
-```python3 LinkCrawler.py URL UPPER_LIMIT```
+python3 LinkCrawler.py URL UPPER_LIMIT
 
 EXAMPLE:
 
-```python3 LinkCrawler.py https://google.com 100```
+python3 LinkCrawler.py https://google.com 100
 
 NOTE:
 
